@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "main": "main.js",
   "author": "K-Isa <name@g.com>",
-  "homepage": "https://gitlab.com/frontend/YOUR_PROJECT_MAIN_PAGE_URL.git",
+  "homepage": "https://gitlab.com/YOUR_PROJECT_MAIN_PAGE_URL.git",
   "license": "MIT",
   "description": "",
   "scripts": {
@@ -24,7 +24,7 @@
   "private": true,
   "repository": {
     "provider": "generic",
-    "url": "git+https://gitlab.com/frontend/YOUR_PROJECT_MAIN_PAGE_URL.git",
+    "url": "git+https://gitlab.com/YOUR_PROJECT_MAIN_PAGE_URL.git",
     "release": "latest"
   },
   "build": {
