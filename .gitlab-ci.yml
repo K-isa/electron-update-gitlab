@@ -1,0 +1,63 @@
+stages:
+  - Build
+  - Upload
+  - Release
+
+build:
+  stage: Build
+  when: manual
+  image: electronuserland/builder:wine
+  before_script:
+    - npm install
+  script:
+    - export VERSION=$(node -e "console.log(require('./package.json').version)")
+    - echo "VERSION=$VERSION" >> variables.env
+    - export APPNAME=$(node -e "console.log(require('./package.json').productName)")
+    - echo "APPNAME=$APPNAME" >> variables.env
+    - npm run build
+  artifacts:
+    reports:
+      dotenv: variables.env
+    name: $CI_COMMIT_REF_SLUG
+    paths:
+      - $CI_PROJECT_DIR/dist/*.*
+    when: on_success
+  only:
+    - master
+
+variables:
+  WIN_BINARY: '${APPNAME}-${VERSION}.exe'
+  PACKAGE_REGISTRY_URL: '${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${APPNAME}/${VERSION}'
+
+upload:
+  stage: Upload
+  needs:
+    - job: build
+      artifacts: true
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never # Do not run this job when a tag is created manually
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH # Run this job when when commits are pushed to the default branch
+  before_script:
+    - apk --no-cache add curl
+  script:
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file "./dist/${WIN_BINARY}" "${PACKAGE_REGISTRY_URL}/${WIN_BINARY}"'
+
+auto-release-master:
+  image: registry.gitlab.com/gitlab-org/release-cli
+  needs:
+    - job: build
+      artifacts: true
+    - job: upload
+      artifacts: true
+  stage: Release
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never # Do not run this job when a tag is created manually
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH # Run this job when when commits are pushed to the default branch
+  script:
+    - echo "Release $VERSION"
+    - |
+      release-cli create --name "Release $VERSION" --tag-name v$VERSION \
+      --description 'Created using the release-cli. $CI_COMMIT_TITLE' --ref $CI_COMMIT_SHA \
+      --assets-link "{\"name\":\"${APPNAME}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${WIN_BINARY}\"}"

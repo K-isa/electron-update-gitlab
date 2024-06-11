@@ -1,0 +1,65 @@
+{
+  "name": "app-name",
+  "productName": "AppName",
+  "version": "1.0.0",
+  "main": "main.js",
+  "author": "K-Isa <name@g.com>",
+  "homepage": "https://gitlab.com/frontend/YOUR_PROJECT_MAIN_PAGE_URL.git",
+  "license": "MIT",
+  "description": "",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pack": "electron-builder --dir",
+    "build": "npx electron-builder build -p always --win --ia32"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "electron-updater": "^6.1.8"
+  },
+  "devDependencies": {
+    "electron": "29.2.0",
+    "electron-builder": "24.13.3"
+  },
+  "private": true,
+  "repository": {
+    "provider": "generic",
+    "url": "git+https://gitlab.com/frontend/YOUR_PROJECT_MAIN_PAGE_URL.git",
+    "release": "latest"
+  },
+  "build": {
+    "appId": "com.Name.AppName",
+    "productName": "AppName",
+    "artifactName": "${productName}-${version}.${ext}",
+    "directories": {
+      "buildResources": "resources",
+      "output": "dist"
+    },
+    "publish": {
+      "provider": "generic",
+      "url": "https://gitlab.com/api/v4/projects/PROJECT_ID/jobs/artifacts/master/raw/dist?job=build"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "publisherName": "Name",
+      "certificateFile": "./cert/electronCertificate.pfx",
+      "certificatePassword": "password",
+      "verifyUpdateCodeSignature": false,
+      "target": [
+        {
+          "target": "nsis"
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "target": "deb"
+    }
+  }
+}
